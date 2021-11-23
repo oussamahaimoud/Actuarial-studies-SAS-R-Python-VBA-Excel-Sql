@@ -1,0 +1,84 @@
+I) Modèle de nombre des sinistres avec régression :
+
+	1) Modèle de poisson avec régression :
+
+		proc genmod data=fouad.Var_code;
+		Class sexe marque combustion puissance_fiscale age_conducteur age_vehicule region;
+		Model nombre_sinistre = sexe marque combustion puissance_fiscale age_conducteur age_vehicule region/
+		dist=poi link=log offset=offset;
+		Title 'Ajustement par Poisson'
+		ods output Modelfit=Pois;
+		run;
+		data marrifouad.Poisson;
+		set Pois;
+		pvalue=1-cdf('chisq',value,df);
+		run;
+
+	2) Modèle Binomial négtive avec régression :
+
+		proc genmod data=fouadmarri.freqa;
+		Class combustion age_vehicule;
+		Model nombre_sinistre = combustion age_vehicule/
+		dist=nbin link=log offset=offset;
+		Title 'Ajustement par Binomiale négative'
+		ods output Modelfit=Nbin;
+		run;
+		data fouadmarri.Nbn;
+		set Nbin;
+		pvalue=1-cdf('chisq',value,df);
+		run;
+
+	3) Modèle de Poisson à inflation de zéros (Zero Inflated Poisson)
+		
+		proc genmod data=fouad.freq;
+		Class combustion age_vehicule;
+		Model nombre_sinistre = combustion age_vehicule/
+		dist=zip link=log offset=offset;
+		zeromodel / link=logit;
+		Title 'Ajustement par ZIP'
+		ods output Modelfit=ZIP;
+		run;
+		data fouadmarri.ZIP;
+		set ZIP;
+		pvalue=1-cdf('chisq',value,df);
+		run;
+
+	4) Modèle binomial négative à inflation de zéros (Zero Inflated Negative Binomial)
+
+		proc genmod data=marrifouad.freqa;
+		Class combustion age_vehicule;
+		Model nombre_sinistre = combustion age_vehicule/
+		dist=zinb link=log offset=offset;
+		zeromodel / link=logit;
+		Title 'Ajustement par ZINB'
+		ods output Modelfit=ZINB;
+		run;
+		data marrifouad.ZINB;
+		set ZINB;
+		pvalue=1-cdf('chisq',value,df);
+		run;
+
+II) Modélisation des coûts individuels des sinistres :
+
+	1) La loi Gama :
+		
+		proc genmod data=marrifouad.SP2;
+		Class sexe marque combustion puissance_fiscale age_conducteur age_vehicule region;
+		Model CM = sexe marque combustion puissance_fiscale age_conducteur age_vehicule region/
+		dist=gamma link=log;
+		Title 'Ajustement par la loi Gamma';
+		ods output modelfit=Gam;
+		run;
+
+	2) La loi Log-normale :
+		Data marrifouad.CM;
+		set marrifouad.SPP;
+		loga=log(CM)
+		run;
+		proc genmod data=DL.CM
+		Class sexe marque combustion puissance_fiscale age_conducteur age_vehicule region;
+		Model loga= sexe marque combustion puissance_fiscale age_conducteur age_vehicule region/
+		dist=normal link=id;
+		Title 'Ajustement par la loi Log-normale';
+		ods output modelfit=logn;
+		run;
