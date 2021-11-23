@@ -1,0 +1,43 @@
+I) Distributions de survie (Survival models) :
+
+	I-1) Généralités :
+		
+			Le mot "actuaire" correspond au spécialiste de la gestion des risques au sein des compagnies d'assurance. Il conduit des études pour modéliser
+			 mathématiquement ces risques. Mais il maîtrise aussi les aspects juridiques, comptables, fiscaux et commerciaux dans lequels se situe son
+			 intervention : 
+					- élaboration et tarification de contrats d'assurance
+					- évaluation de produits financiers
+					- choix d'investissement
+					- gestion des risques financiers
+
+			Voici une liste des écoles internationales qui délivrent le titre d'actuaire :
+					- Institut of Actuaries (Grande Bretagne)
+					- Society of Actuaries "SOA"
+					- Casualty Actuarial Society "CAS" (USA)
+					- Egyptian Society of Actuaries "ESA" (Egypte)
+					- Association Marocaine des Actuaires "AMA" (Maroc)
+					- Institut des Actuaires de Côte d'Ivoire
+					- Actuarial Society of South Africa
+
+			Au Maroc, la Direction des Assurances et de la Prévoyance Sociale "DAPS" est chargée de la réglementation et du contrôle de l'activité
+			 des organismes d'assurances. Elle veille au respect des droits des assurés et bénéficiaires de contrats d'aasurances. Elle participe
+			 à l'élaboration de la réglementation et au contrôle des organismes de prévoyance sociale. Elle est chargée de mener des enquêtes et études
+			 actuarielles en vue d'évaluer et de déterminer les tarifs et cotisations des différentes branches d'assurances et des régimes de
+			 prévoyance sociale. Elle est chargée aussi de s'assurer de la solvabilité des entreprises et intermédiaires d'assurances.
+
+			Les assurances dommages (du patrimoine) : elles ont pour but de garantir les biens de l'individu et les dommages qu'il pourrait causer à lui.
+							 	- Assurances des biens appartenant à l'assuré
+								- Assurances de R.C (assurances des conséquences de la résponsabilité de l'assuré
+
+			Les assurances de personnes (de la personne même de l'assuré) : elles ont pour but [1] de garantir l'intégrité physique de l'individu et les 
+			conséquences d'un décès prématuré ou d'une vieillesse prolongée [2] et de couvrir les risques relatifs aux individus comme les accidents
+			corporels, la maladie, le décès ou encore l'invalidité.
+
+			Le contrat d'assurance vie est un contrat par lequel, en échange d'une prime, l'assureur s'engage à verser au bénéficiaire désigné des sommes
+			en cas de décès (ou survie) de la personne assurée à une époque déterminée.
+
+			Les sommes versées ont un caractère fofaitaire, càd les sommes versées en cas de sinistres sont connues d'avance et fixées librement par
+			le souscripteur à la souscription du contrat. Ainsi l'assureur paiera des sommes forfaitaires prévues au contrat qui n'a pas pour but de 
+			réparer le préjudice subi, car on ne peut pas évaluer le prix d'une vie humaine.
+
+			

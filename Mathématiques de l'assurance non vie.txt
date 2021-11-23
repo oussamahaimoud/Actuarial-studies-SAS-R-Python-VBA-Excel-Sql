@@ -1,0 +1,404 @@
+I) Modélisation en assurance IARD :
+
+	I-1) Montant des sinistres :	
+
+	Ce chapitre traite la modélisation statistique des montants de sinistres en assurance de dommages.
+	L'objectif d'une modélisation est généralement de déterminer un modèle pour les données.
+	Ce chapitre présente des méthodes permettant d'évaluer des modèles et de les comparer entre eux.
+
+	
+			Les données en assurance de dommages se présentent principalement sous deux formes :
+				- Individuelles : le montant individuel de chaque sinistre est connu :
+					exemple : {231, 116, 436, 410, 351)
+				- Groupées : On ne dispose que d'un sommaire du # de sinistres par intervalle :
+					exemple : | intervalle ||#d'observations|
+				  		|]0,250]     ||      30       |
+				  		|]250,500]   ||      31       |
+				  		|]500,1000]  ||      57       |
+				  		|]1000,1500] ||      42       |
+				  		|]1500,2000] ||      65       |
+				  		|]2000,2500] ||      84       |
+
+			Les modèles actuariels peuvent être de plusieurs types :
+				- Coûts de réparation après incendie d'une maison
+				- Fréquence des accidents automobiles
+				- Décès de personnes dans une population
+				- Coûts pour la couverture pour médicament
+
+			Processus de modélisation :
+
+				* Trouver un modèle décrivant les données disponibles ;
+				* Calibrer le modèle, en estimant ses paramètres  ;
+				* Valider le modèle (l'ajustement à l'aide de tests statistiques)
+				* Au besoin, répéter les étapes pour des modèles alternatifs
+				* Choisir un modèle selon un ou des critères
+
+				- Classiquement, on peut commencer par faire des ajustements des lois les plus classiques
+		  			(loi exponentielle, loi Gamma, loi de Pareto, loi de Weibull, ...)
+		
+				- Estimer les paramètres de la distribution des montants des sinistres à partir des données
+		  			en utilisant la méthode des moments et la méthode du maximum de vraisemblance :
+						Sous R : library(MASS)
+						Sous R : fitdistr(data, "exponential")$estimate
+						Sous R : fitdistr(data, "lognormal")$estimate
+
+				- Tests statistiques : Test de Kolmogorov-Smirnov
+					Sous R : ks.test(data, pexp, paramètre)
+					Sous R : ks.test(data, pgamma, parmètre1, paramètre2)
+
+				- Choix d'un modèle : 
+				- Critère Bayesien de Schwarz : SBC = I - (p/2)*ln(n)
+				- Critère d'Information de Akaike : AIC = - I + 2p
+					Sous R : fitdistr(x, "exponential")$loglik
+		
+			Exemple : 
+			
+				Un assureur souhaite modéliser les données suivantes : 
+				On hésite entre les distributions Gamma, log-normale, exponeniel pour modéliser le montant de sinistre
+					Sous R :
+						x <- c(30, 38, 34, 29, 35, 34, 29, 39, 20, 37, 21, 27, 37, 18, 37, 34, 17, 28, 38, 32)
+						library(MASS)
+						fitgamma <- fitdistr(x, "gamma")$estimate
+						fitlognormal <- fitdistr(x, "lognormal")$estimate
+						plot(ecdf(x))
+						curve(pgamma(x, fitgamma[1], fitgamma[2], add = TRUE, lwd = 2, col = "blue")
+						curve(pgamma(x, fitlognormal[1], fitlognormal[2], add = TRUE, lwd = 2, col = "red")
+
+						legend(x=15,y=0.9, legend=c("Fonction de répartition de x", "Fonction de répartition de la loi Gamma",
+					      	 "Fonction de répartition de la loi lognormal"), lty=1.3, col=c("black", "blue", "Red"))
+						ks.test(x, pgamma, fitgamma[1], fitgamma[2])
+
+	I-2) Fréquence des sinistres :
+		 
+		Le but de ce chapitre est de présenter différents modèles pour la fréquence des sinistres N
+		Les principales caractéristiques des lois de probabilité les plus souvent utilisées pour le dénombrement des sinistres en assurance N :
+			- La loi binomiale : E(N) > V(N)
+			- La loi de Poisson : E(N) = V(N)
+			- La loi binomiale négative : E(N) < V(N)
+
+		Exemple : 
+
+			Un portefeuille d'assurance compte 26 contrats. Le tableau ci-dessous résume l'information connue à propos des nombres des sinistres :
+			Parmi les distributions binomiale, poisson, binomiale négative, laquelle semble la plus appropriée pour modéliser ces données ?
+				Sous R :
+					> x
+				 	 [1] 1 0 0 1 2 0 1 0 0 1 1 0 0 2 0 0 0 0 2 3 3 3 2 1 4
+					> table(x)
+					x
+					 0  1  2  3  4
+					 11 6  4  4  1
+					>
+					>
+					> table(x)/length(x)
+					x 
+					 0     1     2     3     4
+					 0.42  0.23  0.15  0.15  0.03
+					
+					fitdistr(x, "poisson")$estimate
+					lamdba
+					1.15
+
+			Test du khi carré de Pearson
+				|   j   ||    Pj    ||  n*Pj  ||  Oj  |
+ 				|   0   ||  0,3154  ||  8,20  ||  11  |
+				|   1   ||  0,3639  ||  9,46  ||  06  |
+				|  =>2  ||  0,3297  ||  8,34  ||  09  |
+
+					avec : pj est la proba d'observer la valeur j selon le modèle
+					       n*pj est la fréquence espérée de cette valeur dans un échantillon de taille n
+				
+				La statistique du test Q=2,2738.
+				La statistique du test a une ditribution khi carré avec 3-1-1=1 degré de liberté.
+				Le 95° centile d'une loi X²(1) étant 3,8415.
+				Décision : On ne rejette pas le modèle.
+					
+					Sous R :
+
+						x=c(1, 0, 0, 1, 2, 0, 1, 0, 0, 1, 1, 0, 0, 2, 0, 0, 0, 0, 2, 3, 3, 3, 2, 1, 4)
+						para=fitdistr(x, "poisson")$estimate
+						poistheo=vector()
+						poistheo[1:2]=dpois(0:1,para);
+						poistheo[3]=1-ppois(1,para);
+
+						y=table(x)/length(x)
+						empiri=rep(0,2)
+						empiri[1:2]=y[1:2]
+						empiri[3]=1-sum(empiri[1:2])
+
+						chisq.test(length(x)*empiri, p=poistheo)
+						qchisq(0.95,1)
+						pvalue=1-pchisq(2.2752,1)
+	
+					A noter : Ce test est valide si le nombre espéré de données dans chacune des classes est supérieur à 5.
+						  Si ce n'est pas le cas, il faut regreouper les classes.
+
+
+		Exemple : 
+
+			Un portefeuille d'une compagnie d'assurance comptant 1000 contrats a produit les fréquences des sinistres ci-dessous :
+				|# sinistres||# contrats|
+				|     0     ||   100    |      Parmi les distributions, Poisson, binomiale négative, laquelle semble la plus
+				|     1     ||   267    |      appropriée pour modéliser les données ?
+				|     2     ||   311    |
+				|     3     ||   208    |
+				|     4     ||    87    |
+				|     5     ||    23    |
+				|     6     ||     4    |
+				|    =>7    ||     0    |
+
+							Sous R : 
+								> freq=c(100, 267, 311, 208, 87, 23, 4)
+								> freq 
+								[1] 100 267 311 208 87 23 4
+								> x=rep(0:6,freq)
+								> table(x)
+								x
+								  0      1      2      3      4      5       6
+								100    267    311    208     87     23       4
+								> mean(x)
+								[1] 2
+								> var(x)
+								> 1.495495
+								> y=table(x)
+								> y
+								x
+								  0      1      2      3      4      5       6
+								100    267    311    208     87     23       4
+								> barplot(y,col="blue",main="Fréquence des sinistres")
+
+
+						Ajustement par la loi de Poisson :
+							Sous R : 
+								> library("vcd")
+								> goodfit(x,"pois")
+								> names(goodfit(x,"pois"))
+								> goodfit(x,"pois")$par
+								$lambda
+								[1] 2
+								> plot(goodfit(x,"pois"),main="Ajustement par la loi de Poisson")
+								voir source : https://www.actuarialab.net/wp-content/uploads/partie5assurancenonvie.pdf (page 6)
+
+						Ajustement par la loi binomiale négative:
+							Sous R: Voir lien https://www.actuarialab.net/wp-content/uploads/partie5assurancenonvie.pdf (page 7)
+
+						Ajustement par la loi binomiale :
+							Sous R: Voir lien https://www.actuarialab.net/wp-content/uploads/partie5assurancenonvie.pdf (page 9)
+
+					Décision finale (selon Georges Box) : All models are wrong, but some are useful.
+
+
+II) Modélisation des risques individuels
+	
+	On considère un portefeuille de risques individuels (exemple) :
+		- Coûts (en sinistres) pour un contrat d'assurance IARD  (auto-habitation).
+		- Coûts pour un contrat d'assurance vie.
+		- Coûts pour un régime d'assurance collective.
+		- Coûts pour un contrat d'assurance maladie.
+		- Coûts pour un régime d'assurance pour accident de travail.
+
+	Notation : 
+		  - X est une v.a représentant les coûts reliés à un risque individuel.
+		  - en actuariat, X représente les pertes éventuelles pouvant être engendrées par un contrat d'assurance.
+
+	Le mantant total des coûts (sinistres ou pertes) encourus pour le portefeuille est représenté par la v.a : Sn=X1+X2+...+Xn
+	La façon de modéliser Xj dépend du type de risque et de la nature de la perte qui peut être associée à ce risque.
+
+	Dans ce chapitre, on examine trois approches pour modéliser les coûts pour le risque j (Xj)
+		- Approche indemnitaire
+		- Approche forfaitaire
+		- Approche fréquence-sévérité
+
+	II-1) Approche indemnitaire :
+		
+		Principe : on prévoit la survenance d'au plus un événement qui peut causer un sinistre pendant la période.
+		
+		Exemple : Un contrat d'assurance vie temporaire 1 an prévoit le paiement à son bénéficiaire d'une prestation d'aun mantant b
+			   à la fin de la période en cas de décès de l'assuré.
+		
+		On définit une v.a I qui obéit à une loi de bernoulli de moyenne q tel que : I={1 si l'assuré décède, 0 sinon}
+		 avec  Pr(I=1)=q=1-Pr(I=0)
+		
+		La v.a X est définie alors par : X={b si I=1, 0 si I=0}
+		 avec : Pr(X=b)=q=1-Pr(X=0) et E(X)=b*q     Var(X)=b²*p*q  
+
+			Exemple : Un contrat d'assurance vie temporaire 1 an est émis à un individu de 50 ans.
+				  La proba de décès à 50 ans est q=0.0073.
+				  La prestation de décès est de 100000$ 
+					E(X)=b*q=100000*0.0073=730    Var(X)=b²*q*(1-q)=100000²*0.0073*0.9927=...
+
+	II-2) Approche forfaitaire :
+
+		Principe : on a recours à un modèle qui distingue entre avoir aucun sinistre et le montant total encouru pour un contrat
+			    si au moins un sinistre se produit.
+		
+		L'approche forfaitaire peut être appliquée en assurance IARD et en assurance maladie, comme par exemple dans les types d'assurance :
+			- Assurance habitation (avec protection incendie)
+			- Assurance automobile
+			- Assurance commerciale
+			- Assurance responsabilité professionnelle
+			- Assurance en soins de santé
+
+		Un risque individuel IARD se caractérise par le fait qu'il prend des valeurs positives. La proba qu'il prenne 0 est non nulle.
+
+		La v.a X représente les coûts en sinistre pour un contrat individuel au cours d'une période fixée.
+		X={B si I=1, 0 si I=0} avec I={1 si au moins un sinistre se produit, 0 sinon}
+		
+		La v.a B correspond au coût total en sinistres encourus pour le contrat si au moins un sinistre se produit pendant la période.
+		En assurance en soins de santé, la v.a B resprésente la somme de tous les frais encourus si au moins une réclamation est faite au cours du temps.
+		Alors : E(X)=q*E(B)    Var(X)=E(I)*Var(B)+Var(I)*E²(B)
+
+		Exemple : On considère un contrat d'assurance maladie émis à une famille.
+			  On suppose que I~Ber(0.5) et B~Exp(lambda) tel que E(B)=1/lambda=1000
+					Solution : voir source : https://www.actuarialab.net/wp-content/uploads/partie6assurancenonvie.pdf (pages 11, 13)
+
+	II-3) Approche fréquence-sévérité :
+
+		Principe : on distingue la fréquence de la sévérité pour le risque actuariel associé à un contrat individuel.
+
+		L'approche fréquence-sévérité peut être appliquée en assurance IARD et en assurance maladie dans les contextes d'assurance suivants :
+			- Assurance habitation (avec protection incendie), assurance automobile.
+			- Assurance commerciale, assurance responsabilité professionnelle, assurance en soins de santé.
+
+		Le risque actuariel correspond aux coûts occasionnés par le remboursement des sinistres advenus pendant une année pour un contrat.
+
+		On définit la v.a discrète N comme le nombre de sinistres s'étant produit durant une période où : Pr(N=j)=Pn(j).
+		Le montant du j-ème sinistre est représenté par la v.a Bj. On suppose que B1,B2,... forment une suite de v.a iid de fct commune FB.
+		Le mantant pouvant être réclamé au cours d'une période pour un risque individuel est défini par la v.a X (X est une somme aléatoire) :
+			X={sigma(1 à N) de Bj si N>0, 0 si N=0}    On dit alors que X obéit à une loi composée.
+
+		Proposition :  E(X)=E(N)*EB)       Var(X)=E(N)*Var(B)+Var(N)*E²(B)
+
+		
+		Distributions de fréquence :
+			
+			Selon l'approche fréquence-sévérité, la v.a X est définie fonction de la v.a N # sinistres et de la v.a B montant d'un sinistre.
+			
+			Les principales lois pour la v.a de fréquence N sont les lois :
+				- Binomiale (pour X : Binomiale composée, X~BinomComp(n,q,FB))
+				- Poisson (pour X : Poisso composée, X~PoissonComp(lambda,FB))
+				- Binomiale négative (pour X : Binomiale négative composée, X~BinNegComp(r,bêta,FB))
+
+			
+			Voir source : https://www.actuarialab.net/wp-content/uploads/partie6assurancenonvie.pdf (pages 22-->35)
+
+			
+III) Montant total de sinistres pour un portefeuille :
+
+	Dans ce chapitre, on examine les coûts pour un portefeuille qui représente un ensemble de risques individuels.
+	
+	Exemple : - Coûts pour un portefeuille d'assurance vie ou IARD (1 ou plusieurs classes : auto, habitation)
+		  - Coûts pour un régime d'assurance collective
+
+	Connaitre le comportement du risque global permet à la compagnie d'assurance ou autre entité financière d'évaluer la santé financière du portefeuille.
+
+	III-1) Modèle individuel du risque :
+
+		Un portefeuille se compose de plusieurs risques, et la façon la plus simple pour évaluer la distribution de la charge totale de ce portefeuille
+		consiste à traiter chaque risque isolément, et ensuite à rassembler les résultats afin d'obtenir un résultat global pour tout le portefeuille :
+		c'est le cas des modèles individuels.
+
+		Dans le modèle individuel, on décrit d'abord les risques individuellement puis on examine le risque globale du portefeuille.
+
+		Le nombre de contrats est fixé, égale à n. La charge totale des sinistres est modélisée par la variable aléatoire :
+
+			Sn=sigma(j de 1 à n) Xj
+			Xj Montants des sinistres du j-ème contrat.
+			X1,...,Xn indépendants, pas nécessairement de même loi.  
+			La loi de Sn et ses caractéristiques se déduit de celles des Xj
+
+		On est intéressé à avoir une idée du comportement de la v.a Sn.
+
+		Connaître la distribution de Sn est utile pour calculer les mesures de risques reliés à un portefeuille, pour évaluer sa solvabilité.
+
+		E(Sn)=sigma(j de 1 à n)E(Xj)    Et si: les v.a Xj sont identiquement distribuées (i.d.), on a :  E(Sn)=n*E(X)
+
+		Var(Sn)= voir source https://www.actuarialab.net/wp-content/uploads/partie6assurancenonvie.pdf (page 40)
+
+		Fonction génératrice des moments= voir source https://www.actuarialab.net/wp-content/uploads/partie6assurancenonvie.pdf (page 41)
+		
+		Théorème central limite (TCL) : 
+						Le TCL est d'une grande importance pour fournir une première approximation à la distribution de Sn.
+						L'application du TCL fournit une approximation de la fonction de répartistion de Sn par une fonction
+						de répartition de la loi normale :
+
+										(Sn-E(Sn))/racine(Var(Sn))--> Z
+
+						Sn = Montant total réclamé pour un portefeuille
+
+	III-2) Modèle collectif du risque :
+
+		Principe : on décrit directement le comportements des coûts pour un portefeuille par une loi composée sans mentionner le # de risques du portefeuille.
+	
+		La charge totale S des sinistres suit une loi composée :
+			- S=sigma(j de 1 à n)Xj     avec S=0 si N=0
+			- N v.a = # sinistres
+			- Xj v.a i.i.d = montants des sinistres de fct.rep Fx
+			- N et Xj sont indépendants
+
+		III-2-1) Modèle de poisson composée : voir source https://www.actuarialab.net/wp-content/uploads/partie6assurancenonvie.pdf (page 45)
+		III-2-2) Modèle binomial composé : voir source https://www.actuarialab.net/wp-content/uploads/partie6assurancenonvie.pdf (page 49)
+		III-2-3) Modèle binomial négative composé : voir source https://www.actuarialab.net/wp-content/uploads/partie6assurancenonvie.pdf (page 54)
+
+	III-3) Mesure de solvabilité :
+		
+		La mesure de solvabilité vise à évaluer que le détenteur d'un portefeuille de risque rencontre ses engagements au cours de la prochaine période.
+		
+		La proba de ruine pour un portefeuille correspond à la proba que la compagnie ne rencontre pas ses engagements : Pr(Sn>sigme(j de 1 à n)Pj+u)
+			avec : 
+				- Sn = Coûts totaux pour le portefeuille (ensemble des engagements pour la prochaine période)
+				- sigma... = revenu total des primes où pj est la prime pour le risque j (ensemble des revenus pour la prochaine période)
+				- u = surplus ou capital initial alloué au portefeuille
+
+		On doit donc connaître la fct/rep du montant total des sinistres FSn pour trouver la proba de ruine, d'où l'importance d'être en mesure d'évaluer FSn.
+		
+		La proba de ruine est un outil qui aide l'actuaire dans l'évaluation et la gestion des risques.
+
+		Applications : - vérifier si le niveau du capital initial alloué "u" au portefeuille est suffisant.
+			       - vérifier si le niveau de prime est adéquat.
+		
+		On a recours à la proba de ruine pour démontrer la nécessité d'une marge de sécurité positive. Pour cela, on s'intéresse à la proba de ruine quand
+		 le nombre de contrats assurés n augmente et que la prime Pj chargée est soit inférieure, ou supérieure à l'espérence du montant réclamé par contrat j.
+
+		On commence avec le comportement de phi dans le cas de risques individuels dont les coûts sont i.i.d.
+		
+		Proposition : on suppose que les risques Xi sont des v.a i.i.d
+			      La prime chargée pour chaque contrat est p (pj=p)
+			      On suppose que  E(Xi)=E(X)=µ et Var(Xi)=sigma² :
+					Si p>µ ---> la proba de ruine -->  0
+					Si p<µ ---> la proba de ruine ---> 1
+			
+					Exemple : 
+						 On considère un portefeuille homogène de contrats d'assurance vie. Les durées de vie des assurés sont i.i.d.
+						 La proba de décès est de 0.02 et la prestation en cas de décès est de 1000.
+						 On examine le comportement de la proba de ruine lorsque la taille du portefeuille s'accroît et pour des primes
+						  de 10, 30 et 40.
+						 L'espérence des coûts pour un contrat est 20. On suppose que le capital initial est nul.
+
+							Sous R : voir source https://www.actuarialab.net/wp-content/uploads/partie6assurancenonvie.pdf (page 62)
+
+
+IV) Méthodes récursives d'évaluation :
+
+	Voir source voir source https://www.actuarialab.net/wp-content/uploads/partie7assurancenonvie.pdf 
+
+	Lorsqu'on examine le comportement des coûts d'un portefeuille de risques, on est confronté à évaluer la distribution d'une somme de v.a (indépendants ou non)
+
+	On peut appliquer ces méthodes dans le contexte actuariel :
+			- Calcul de la distribution des coûts pour un risque défini selon l'approche fréquence-sévérité à l'aide d'algorithme de Panjer
+			   et méthodes de discrétisation.
+			- Calcul de la distribution des coûts pour un portefeuille dans le cas où la loi des coûts peut s'exprimer sous la forme d'une loi compsée.
+			- Calcul de la distribution des coûts pour un portefeuille dans le cas où les risques individuels sont définis selon les approches
+			   indemnitaires et forfaitaires.
+
+
+
+			
+
+
+
+
+
+
+
+
+
