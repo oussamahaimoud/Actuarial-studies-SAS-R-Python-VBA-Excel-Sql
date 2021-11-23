@@ -1,2 +1,2 @@
-# Tarification-with-Machine-Learning-
-Tarification Assurance RC-auto
+# Actuarial studies
+Average Cost, Claims, Prime Premium, Best Estimate, Liabilities, Solvency II, IFRS, IAS19, ...
